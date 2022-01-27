@@ -680,7 +680,7 @@ func (s *snapsSuite) TestRefreshMany1(c *check.C) {
 }
 
 func (s *snapsSuite) TestInstallMany(c *check.C) {
-	defer daemon.MockSnapstateInstallMany(func(s *state.State, names []string, userID int) ([]string, []*state.TaskSet, error) {
+	defer daemon.MockSnapstateInstallMany(func(s *state.State, names []string, userID int, _ *snapstate.Flags) ([]string, []*state.TaskSet, error) {
 		c.Check(names, check.HasLen, 2)
 		t := s.NewTask("fake-install-2", "Install two")
 		return names, []*state.TaskSet{state.NewTaskSet(t)}, nil
@@ -698,7 +698,7 @@ func (s *snapsSuite) TestInstallMany(c *check.C) {
 }
 
 func (s *snapsSuite) TestInstallManyEmptyName(c *check.C) {
-	defer daemon.MockSnapstateInstallMany(func(_ *state.State, _ []string, _ int) ([]string, []*state.TaskSet, error) {
+	defer daemon.MockSnapstateInstallMany(func(_ *state.State, _ []string, _ int, _ *snapstate.Flags) ([]string, []*state.TaskSet, error) {
 		return nil, nil, errors.New("should not be called")
 	})()
 	d := s.daemon(c)
@@ -784,30 +784,35 @@ Id=snap.foo.svc1.service
 Names=snap.foo.svc1.service
 ActiveState=fumbling
 UnitFileState=enabled
+NeedDaemonReload=no
 `),
 		[]byte(`Type=forking
 Id=snap.foo.svc2.service
 Names=snap.foo.svc2.service
 ActiveState=active
 UnitFileState=disabled
+NeedDaemonReload=no
 `),
 		[]byte(`Type=oneshot
 Id=snap.foo.svc3.service
 Names=snap.foo.svc3.service
 ActiveState=reloading
 UnitFileState=static
+NeedDaemonReload=no
 `),
 		[]byte(`Type=notify
 Id=snap.foo.svc4.service
 Names=snap.foo.svc4.service
 ActiveState=inactive
 UnitFileState=potatoes
+NeedDaemonReload=no
 `),
 		[]byte(`Type=simple
 Id=snap.foo.svc5.service
 Names=snap.foo.svc5.service
 ActiveState=inactive
 UnitFileState=static
+NeedDaemonReload=no
 `),
 		[]byte(`Id=snap.foo.svc5.timer
 Names=snap.foo.svc5.timer
@@ -819,6 +824,7 @@ Id=snap.foo.svc6.service
 Names=snap.foo.svc6.service
 ActiveState=inactive
 UnitFileState=static
+NeedDaemonReload=no
 `),
 		[]byte(`Id=snap.foo.svc6.sock.socket
 Names=snap.foo.svc6.sock.socket
@@ -830,6 +836,7 @@ Id=snap.foo.svc7.service
 Names=snap.foo.svc7.service
 ActiveState=inactive
 UnitFileState=static
+NeedDaemonReload=no
 `),
 		[]byte(`Id=snap.foo.svc7.other-sock.socket
 Names=snap.foo.svc7.other-sock.socket
